@@ -7,37 +7,39 @@ const MongoStore = require("connect-mongo")(session);
 const methodOverride = require("method-override");
 const flash = require("express-flash");
 const logger = require("morgan");
+const path = require("path"); // Added import for 'path'
 const connectDB = require("./config/database");
 const mainRoutes = require("./routes/main");
 const postRoutes = require("./routes/posts");
 const commentRoutes = require("./routes/comments");
 
-//Use .env file in config folder
+// Use .env file in config folder
 require("dotenv").config({ path: "./config/.env" });
 
-//Passport config
+// Passport config
 require("./config/passport")(passport);
 
-//Connect To Database
+// Connect To Database
+
 connectDB();
 
-//Using EJS for views
+// Using EJS for views
 app.set("view engine", "ejs");
 
-//Static Folder
-app.use(express.static("public"));
+// Static Folder
+app.use(express.static(path.join(__dirname, "public")));
 
-//Body Parsing
+// Body Parsing
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-//Logging
+// Logging
 app.use(logger("dev"));
 
-//Use forms for put / delete
+// Use forms for put / delete
 app.use(methodOverride("_method"));
 
-//Setup Sessions - stored in MongoDB
+// Setup Sessions - stored in MongoDB
 app.use(
   session({
     secret: "keyboard cat",
@@ -47,19 +49,19 @@ app.use(
   })
 );
 
-//Passport middleware
+// Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-//Use flash messages for errors, info, etc
+// Use flash messages for errors, info, etc.
 app.use(flash());
 
-//Setup Routes server is listening for
+// Setup Routes server is listening for
 app.use("/", mainRoutes);
 app.use("/post", postRoutes);
 app.use("/comment", commentRoutes);
 
-//Server Running
-app.listen(process.env.PORT, () => {
-  console.log("The server is now running.");
+// Server Running
+app.listen(process.env.PORT || 3000, () => {
+  console.log("The server is now running.", process.env.PORT);
 });
